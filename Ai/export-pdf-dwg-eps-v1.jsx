@@ -263,7 +263,8 @@ function exportDwg(doc, folderName, toName) {
   var filename = folder.fullName + '/' +
       doc.name.substr(0, doc.name.lastIndexOf('.')) + toName + '.dwg';
   try {
-    doc.exportFile(new File(filename), ExportType.AUTOCAD, exportOptionsAutoCAD);
+    doc.exportFile(
+        new File(filename), ExportType.AUTOCAD, exportOptionsAutoCAD);
   } catch (e) {
     throw {
       level: 1,
@@ -275,10 +276,11 @@ function exportDwg(doc, folderName, toName) {
 
 /**
  * @param {Document} doc
+ * @param {string} rangeString
  * @param {string} folderName
  * @param {string} toName
  */
-function saveAsEps(doc, folderName, toName) {
+function saveAsEps(doc, rangeString, folderName, toName) {
 
   var folder = new Folder(doc.path + '/' + folderName);
   if (!folder.exists) {
@@ -299,6 +301,9 @@ function saveAsEps(doc, folderName, toName) {
   }
 
   var ePSSaveOptions = new EPSSaveOptions();
+  ePSSaveOptions.compatibility = Compatibility.ILLUSTRATOR13;
+  ePSSaveOptions.saveMultipleArtboards = ('' !== rangeString);
+  ePSSaveOptions.artboardRange = rangeString;
 
   var filename = folder.fullName + '/' +
       doc.name.substr(0, doc.name.lastIndexOf('.')) + toName + '.eps';
@@ -313,7 +318,11 @@ function saveAsEps(doc, folderName, toName) {
   }
 }
 
-function exportPdfDwgEps() {
+/**
+ * @param {Object} options
+ */
+function exportPdfDwgEps(options) {
+
   if (0 === app.documents.length) {
     throw {
       level: 1,
@@ -321,41 +330,189 @@ function exportPdfDwgEps() {
     };
   }
 
-  const FOLDER_NAME = 'Export-PDF-DWG-EPS';
+  const FOLDER_NAME = options.folderName;
   const DOC_FILE = new File(app.activeDocument.fullName);
   const DOC_ARTBOARDS_LENGTH = app.activeDocument.artboards.length;
 
   var doc, i, pageNumber;
+
   // Экспорт в pdf
   // Все страницы в один
-  doc = app.activeDocument;
-  saveAsPdf(doc, '', FOLDER_NAME, '_PAGE_ALL');
-  doc.close();
+  if (true === options.pdfSingle) {
+    doc = app.activeDocument;
+    saveAsPdf(doc, '', FOLDER_NAME, '');
+    doc.close();
+  }
 
-  // Страницы в отдельные файлы
-  for (i = 0; i < DOC_ARTBOARDS_LENGTH; i++) {
+  if (true === options.pdfMultiply || true === options.epsMultiply) {
+    // Страницы в отдельные файлы
+    for (i = 0; i < DOC_ARTBOARDS_LENGTH; i++) {
+
+      if (true === options.pdfMultiply) {
+        doc = app.open(DOC_FILE);
+        pageNumber = (i + 1).toString();
+        saveAsPdf(doc, pageNumber, FOLDER_NAME, '_PAGE-'
+            + (pageNumber < 10 ? '0' : '') + pageNumber);
+        doc.close(SaveOptions.DONOTSAVECHANGES);
+      }
+
+      if (true === options.epsMultiply) {
+        doc = app.open(DOC_FILE);
+        pageNumber = (i + 1).toString();
+        saveAsEps(doc, pageNumber, FOLDER_NAME, '_PAGE');
+        doc.close(SaveOptions.DONOTSAVECHANGES);
+      }
+    }
+  }
+
+  // Экспорт в EPS все страницы
+  if (true === options.epsSingle) {
     doc = app.open(DOC_FILE);
-    pageNumber = (i + 1).toString();
-    saveAsPdf(doc, pageNumber, FOLDER_NAME, '_PAGE_' + (i + 1).toString());
+    saveAsEps(doc, '', FOLDER_NAME, '');
     doc.close(SaveOptions.DONOTSAVECHANGES);
   }
 
   // Экспорт в DWG
-  doc = app.open(DOC_FILE);
-  exportDwg(doc, FOLDER_NAME, '');
-  doc.close(SaveOptions.DONOTSAVECHANGES);
+  if (true === options.dwgSingle) {
+    doc = app.open(DOC_FILE);
+    exportDwg(doc, FOLDER_NAME, '');
+    doc.close(SaveOptions.DONOTSAVECHANGES);
+  }
 
-  // Экспорт в EPS
-  doc = app.open(DOC_FILE);
-  saveAsEps(doc, FOLDER_NAME, '');
-  doc.close(SaveOptions.DONOTSAVECHANGES);
+  app.open(DOC_FILE);
 }
 
 const log = new STLog(false);
 const errorSolver = new STErrorSolver();
 
 try {
-  exportPdfDwgEps();
+  showDialog();
 } catch (e) {
   errorSolver.check(e);
+}
+
+function showDialog() {
+  /*
+  Code for Import https://scriptui.joonas.me — (Triple click to select):
+  {"activeId":13,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":null,"windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"Экспорт файла","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"pdfPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"PDF","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-2":{"id":2,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfSingle","text":"В один файл","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-3":{"id":3,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfMultiply","text":"Постранично","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-4":{"id":4,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"dwgPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"DWG","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-5":{"id":5,"type":"Checkbox","parentId":4,"style":{"enabled":true,"varName":"dwgSingle","text":"В один файл","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-6":{"id":6,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"epsPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"EPS","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-7":{"id":7,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsMultiply","text":"Постранично","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-8":{"id":8,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"btnGroup","preferredSize":[200,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["right","center"],"alignment":null}},"item-9":{"id":9,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnExport","text":"Экспорт","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-10":{"id":10,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnCancel","text":"Отмена","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-11":{"id":11,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsSingle","text":"В один файл","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-12":{"id":12,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"mainPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"Настройки","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-13":{"id":13,"type":"EditText","parentId":12,"style":{"enabled":true,"varName":"folderName","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"Export-PDF-DWG-EPS","justify":"left","preferredSize":[0,0],"alignment":"fill","helpTip":null}},"item-14":{"id":14,"type":"StaticText","parentId":12,"style":{"enabled":true,"varName":"labelFolderName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"Папка с результатом:","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}}},"order":[0,12,14,13,1,3,2,4,5,6,7,11,8,10,9],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
+  */
+
+// DIALOG
+// ======
+  var dialog = new Window('dialog');
+  dialog.text = 'File export';
+  dialog.orientation = 'column';
+  dialog.alignChildren = ['center', 'top'];
+  dialog.spacing = 10;
+  dialog.margins = 16;
+
+// MAINPANEL
+// =========
+  var mainPanel = dialog.add(
+      'panel', undefined, undefined, {name: 'mainPanel'});
+  mainPanel.text = 'Options';
+  mainPanel.preferredSize.width = 200;
+  mainPanel.orientation = 'column';
+  mainPanel.alignChildren = ['left', 'top'];
+  mainPanel.spacing = 10;
+  mainPanel.margins = 10;
+
+  var labelFolderName = mainPanel.add(
+      'statictext', undefined, undefined, {name: 'labelFolderName'});
+  labelFolderName.text = 'Folder name:';
+
+  var folderName = mainPanel.add('edittext {properties: {name: "folderName"}}');
+  folderName.text = 'Export-PDF-DWG-EPS';
+  folderName.alignment = ['fill', 'top'];
+
+// PDFPANEL
+// ========
+  var pdfPanel = dialog.add('panel', undefined, undefined, {name: 'pdfPanel'});
+  pdfPanel.text = 'PDF';
+  pdfPanel.preferredSize.width = 200;
+  pdfPanel.orientation = 'column';
+  pdfPanel.alignChildren = ['left', 'top'];
+  pdfPanel.spacing = 10;
+  pdfPanel.margins = 10;
+
+  var pdfMultiply = pdfPanel.add(
+      'checkbox', undefined, undefined, {name: 'pdfMultiply'});
+  pdfMultiply.text = 'Split by pages';
+  pdfMultiply.value = true;
+
+  var pdfSingle = pdfPanel.add(
+      'checkbox', undefined, undefined, {name: 'pdfSingle'});
+  pdfSingle.text = 'One file';
+  pdfSingle.value = true;
+
+// DWGPANEL
+// ========
+  var dwgPanel = dialog.add('panel', undefined, undefined, {name: 'dwgPanel'});
+  dwgPanel.text = 'DWG';
+  dwgPanel.preferredSize.width = 200;
+  dwgPanel.orientation = 'column';
+  dwgPanel.alignChildren = ['left', 'top'];
+  dwgPanel.spacing = 10;
+  dwgPanel.margins = 10;
+
+  var dwgSingle = dwgPanel.add(
+      'checkbox', undefined, undefined, {name: 'dwgSingle'});
+  dwgSingle.text = 'One file';
+  dwgSingle.value = true;
+
+// EPSPANEL
+// ========
+  var epsPanel = dialog.add('panel', undefined, undefined, {name: 'epsPanel'});
+  epsPanel.text = 'EPS';
+  epsPanel.preferredSize.width = 200;
+  epsPanel.orientation = 'column';
+  epsPanel.alignChildren = ['left', 'top'];
+  epsPanel.spacing = 10;
+  epsPanel.margins = 10;
+
+  var epsMultiply = epsPanel.add(
+      'checkbox', undefined, undefined, {name: 'epsMultiply'});
+  epsMultiply.text = 'Split by pages';
+  epsMultiply.value = true;
+
+  var epsSingle = epsPanel.add(
+      'checkbox', undefined, undefined, {name: 'epsSingle'});
+  epsSingle.text = 'One file';
+
+// BTNGROUP
+// ========
+  var btnGroup = dialog.add('group', undefined, {name: 'btnGroup'});
+  btnGroup.preferredSize.width = 200;
+  btnGroup.orientation = 'row';
+  btnGroup.alignChildren = ['right', 'center'];
+  btnGroup.spacing = 10;
+  btnGroup.margins = 0;
+
+  var btnCancel = btnGroup.add(
+      'button', undefined, undefined, {name: 'btnCancel'});
+  btnCancel.text = 'Cancel';
+
+  var btnExport = btnGroup.add(
+      'button', undefined, undefined, {name: 'btnExport'});
+  btnExport.text = 'Export';
+
+  btnExport.onClick = function() {
+    const options = {
+      folderName: folderName.text,
+      pdfSingle: pdfSingle.value,
+      pdfMultiply: pdfMultiply.value,
+      epsSingle: epsSingle.value,
+      epsMultiply: epsMultiply.value,
+      dwgSingle: dwgSingle.value,
+    };
+    dialog.close();
+    exportPdfDwgEps(options);
+  };
+
+  btnCancel.onClick = function() {
+    dialog.close();
+  };
+
+  dialog.show();
+
 }
