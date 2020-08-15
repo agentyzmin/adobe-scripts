@@ -351,7 +351,7 @@ function exportPdfDwgEps(options) {
       if (true === options.pdfMultiply) {
         doc = app.open(DOC_FILE);
         pageNumber = (i + 1).toString();
-        saveAsPdf(doc, pageNumber, FOLDER_NAME, '_PAGE-'
+        saveAsPdf(doc, pageNumber, FOLDER_NAME + '/PDF', '_PAGE-'
             + (pageNumber < 10 ? '0' : '') + pageNumber);
         doc.close(SaveOptions.DONOTSAVECHANGES);
       }
@@ -359,7 +359,7 @@ function exportPdfDwgEps(options) {
       if (true === options.epsMultiply) {
         doc = app.open(DOC_FILE);
         pageNumber = (i + 1).toString();
-        saveAsEps(doc, pageNumber, FOLDER_NAME, '_PAGE');
+        saveAsEps(doc, pageNumber, FOLDER_NAME + '/EPS', '_PAGE');
         doc.close(SaveOptions.DONOTSAVECHANGES);
       }
     }
