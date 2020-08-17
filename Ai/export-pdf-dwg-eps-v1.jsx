@@ -218,8 +218,7 @@ function saveAsPdf(doc, rangeString, folderName, toName) {
     }
   }
 
-  var filename = folder.fullName + '/' +
-      doc.name.substr(0, doc.name.lastIndexOf('.')) + toName + '.pdf';
+  var filename = folder.fullName + '/' + getFileName(doc) + toName + '.pdf';
   try {
     doc.saveAs(new File(filename), pdfSaveOptions);
   } catch (e) {
@@ -260,8 +259,7 @@ function exportDwg(doc, folderName, toName) {
   var exportOptionsAutoCAD = new ExportOptionsAutoCAD();
   exportOptionsAutoCAD.exportOption = AutoCADExportOption.MaximumEditability;
 
-  var filename = folder.fullName + '/' +
-      doc.name.substr(0, doc.name.lastIndexOf('.')) + toName + '.dwg';
+  var filename = folder.fullName + '/' + getFileName(doc) + toName + '.dwg';
   try {
     doc.exportFile(
         new File(filename), ExportType.AUTOCAD, exportOptionsAutoCAD);
@@ -305,8 +303,7 @@ function saveAsEps(doc, rangeString, folderName, toName) {
   ePSSaveOptions.saveMultipleArtboards = ('' !== rangeString);
   ePSSaveOptions.artboardRange = rangeString;
 
-  var filename = folder.fullName + '/' +
-      doc.name.substr(0, doc.name.lastIndexOf('.')) + toName + '.eps';
+  var filename = folder.fullName + '/' + getFileName(doc) + toName + '.eps';
   try {
     doc.saveAs(new File(filename), ePSSaveOptions);
   } catch (e) {
@@ -316,6 +313,10 @@ function saveAsEps(doc, rangeString, folderName, toName) {
       e: e,
     };
   }
+}
+
+function getFileName(doc) {
+  return doc.name.substr(0, doc.name.lastIndexOf('.'));
 }
 
 /**
@@ -392,6 +393,13 @@ try {
 }
 
 function showDialog() {
+  if (0 === app.documents.length) {
+    throw {
+      level: 1,
+      message: 'No opened document.',
+    };
+  }
+
   /*
   Code for Import https://scriptui.joonas.me — (Triple click to select):
   {"activeId":13,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":null,"windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"Экспорт файла","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"pdfPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"PDF","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-2":{"id":2,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfSingle","text":"В один файл","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-3":{"id":3,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfMultiply","text":"Постранично","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-4":{"id":4,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"dwgPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"DWG","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-5":{"id":5,"type":"Checkbox","parentId":4,"style":{"enabled":true,"varName":"dwgSingle","text":"В один файл","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-6":{"id":6,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"epsPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"EPS","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-7":{"id":7,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsMultiply","text":"Постранично","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-8":{"id":8,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"btnGroup","preferredSize":[200,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["right","center"],"alignment":null}},"item-9":{"id":9,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnExport","text":"Экспорт","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-10":{"id":10,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnCancel","text":"Отмена","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-11":{"id":11,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsSingle","text":"В один файл","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-12":{"id":12,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"mainPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"Настройки","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-13":{"id":13,"type":"EditText","parentId":12,"style":{"enabled":true,"varName":"folderName","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"Export-PDF-DWG-EPS","justify":"left","preferredSize":[0,0],"alignment":"fill","helpTip":null}},"item-14":{"id":14,"type":"StaticText","parentId":12,"style":{"enabled":true,"varName":"labelFolderName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"Папка с результатом:","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}}},"order":[0,12,14,13,1,3,2,4,5,6,7,11,8,10,9],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
@@ -422,7 +430,7 @@ function showDialog() {
   labelFolderName.text = 'Folder name:';
 
   var folderName = mainPanel.add('edittext {properties: {name: "folderName"}}');
-  folderName.text = 'Export-PDF-DWG-EPS';
+  folderName.text = getFileName(app.activeDocument);
   folderName.alignment = ['fill', 'top'];
 
 // PDFPANEL
@@ -514,5 +522,4 @@ function showDialog() {
   };
 
   dialog.show();
-
 }
