@@ -146,10 +146,12 @@ function run() {
 
     points.push({
       anchor: anchor,
+      pointType: pageItem.pathPoints[i].pointType === PointType.SMOOTH ?
+      'SMOOTH' : 'CORNER',
       rightDirection:
-          isEqualPoints(anchor, leftDirection) ? null : leftDirection,
-      leftDirection:
           isEqualPoints(anchor, rightDirection) ? null : rightDirection,
+      leftDirection:
+          isEqualPoints(anchor, leftDirection) ? null : leftDirection,
     });
   }
 
