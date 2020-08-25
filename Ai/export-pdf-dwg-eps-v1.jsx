@@ -95,7 +95,7 @@ STErrorSolver = function(level, lang) {
 };
 
 /**
- * Система логирования происходящего
+ * Log system
  * @author Sergey Turulin sergey@turulin.ru
  * @constructor
  * @param {boolean} writeLog
@@ -146,7 +146,7 @@ STLog = function(writeLog) {
 };
 
 /**
- * Подробное описание ошибки
+ * Error report
  * @param e
  */
 function alertError(e) {
@@ -160,35 +160,21 @@ function alertError(e) {
         '\nномер строки: ' + (e.e.line || '[не известно]') +
         '\nфайл ошибки: ' +
         (filePaths[filePaths.length - 1] || '[не известно]') +
-        '\nномер ошибки: ' + (e.e.number || '[не известно]') +
         '\nполный путь файла: ' + (filePath || '[не известно]'),
     );
+
   } else {
-    if (e.fileName) {
-      filePath = e.fileName;
-      filePaths = filePath.split('/');
-      alert(e.message +
-          '\nномер строки: ' + (e.line || '[не известно]') +
-          '\nфайл ошибки: ' +
-          (filePaths[filePaths.length - 1] || '[не известно]') +
-          '\nномер ошибки: ' + (e.number || '[не известно]') +
-          '\nполный путь файла: ' + (filePath || '[не известно]'),
-      );
-    } else {
-      alert(e.message);
-    }
+    alert(e.message);
   }
 }
 
 /**
  * @param {Document} doc
+ * @param {File} file
  * @param {string} rangeString
- * @param {string} folderName
- * @param {string} toName
  */
-function saveAsPdf(doc, rangeString, folderName, toName) {
-
-  var pdfSaveOptions = new PDFSaveOptions();
+function saveAsPdf(doc, file, rangeString) {
+  const pdfSaveOptions = new PDFSaveOptions();
   pdfSaveOptions.viewAfterSaving = false;
   pdfSaveOptions.pDFPreset = '[PDF/X-3:2002]';
   pdfSaveOptions.artboardRange = rangeString;
@@ -200,27 +186,8 @@ function saveAsPdf(doc, rangeString, folderName, toName) {
     };
   }
 
-  var folder = new Folder(doc.path + '/' + folderName);
-  if (!folder.exists) {
-    try {
-      if (!folder.create()) {
-        this.errorSolver.check(
-            1,
-            'Failed to create folder for pdf.',
-        );
-      }
-    } catch (e) {
-      this.errorSolver.check(
-          e.level || 1,
-          e.message || 'Failed to create folder for pdf.',
-          e,
-      );
-    }
-  }
-
-  var filename = folder.fullName + '/' + getFileName(doc) + toName + '.pdf';
   try {
-    doc.saveAs(new File(filename), pdfSaveOptions);
+    doc.saveAs(new File(file), pdfSaveOptions);
   } catch (e) {
     throw {
       level: 1,
@@ -231,38 +198,17 @@ function saveAsPdf(doc, rangeString, folderName, toName) {
 }
 
 /**
- *
+ * Export DWG
  * @param {Document} doc
- * @param {string} folderName
- * @param {string} toName
+ * @param {File} file
  */
-function exportDwg(doc, folderName, toName) {
-
-  var folder = new Folder(doc.path + '/' + folderName);
-  if (!folder.exists) {
-    try {
-      if (!folder.create()) {
-        this.errorSolver.check(
-            1,
-            'Failed to create folder for dwg.',
-        );
-      }
-    } catch (e) {
-      this.errorSolver.check(
-          e.level || 1,
-          e.message || 'Failed to create folder for dwg.',
-          e,
-      );
-    }
-  }
+function exportDwg(doc, file) {
 
   var exportOptionsAutoCAD = new ExportOptionsAutoCAD();
   exportOptionsAutoCAD.exportOption = AutoCADExportOption.MaximumEditability;
 
-  var filename = folder.fullName + '/' + getFileName(doc) + toName + '.dwg';
   try {
-    doc.exportFile(
-        new File(filename), ExportType.AUTOCAD, exportOptionsAutoCAD);
+    doc.exportFile(file, ExportType.AUTOCAD, exportOptionsAutoCAD);
   } catch (e) {
     throw {
       level: 1,
@@ -274,38 +220,18 @@ function exportDwg(doc, folderName, toName) {
 
 /**
  * @param {Document} doc
+ * @param {File} file
  * @param {string} rangeString
- * @param {string} folderName
- * @param {string} toName
  */
-function saveAsEps(doc, rangeString, folderName, toName) {
-
-  var folder = new Folder(doc.path + '/' + folderName);
-  if (!folder.exists) {
-    try {
-      if (!folder.create()) {
-        this.errorSolver.check(
-            1,
-            'Failed to create folder for eps.',
-        );
-      }
-    } catch (e) {
-      this.errorSolver.check(
-          e.level || 1,
-          e.message || 'Failed to create folder for eps.',
-          e,
-      );
-    }
-  }
+function saveAsEps(doc, file, rangeString) {
 
   var ePSSaveOptions = new EPSSaveOptions();
   ePSSaveOptions.compatibility = Compatibility.ILLUSTRATOR13;
   ePSSaveOptions.saveMultipleArtboards = ('' !== rangeString);
   ePSSaveOptions.artboardRange = rangeString;
 
-  var filename = folder.fullName + '/' + getFileName(doc) + toName + '.eps';
   try {
-    doc.saveAs(new File(filename), ePSSaveOptions);
+    doc.saveAs(file, ePSSaveOptions);
   } catch (e) {
     throw {
       level: 1,
@@ -334,9 +260,35 @@ function getFileType(doc) {
 }
 
 /**
+ * Check: if folder exists & create if not exists
+ * @param {Folder} folder
+ */
+function checkFolder(folder) {
+  log.addPart('fun: checkFolder()');
+
+  if (!folder.exists) {
+    try {
+      if (!folder.create()) {
+        this.errorSolver.check(
+            1,
+            'Failed to create folder "' + folder.name + '".',
+        );
+      }
+    } catch (e) {
+      this.errorSolver.check(
+          e.level || 1,
+          e.message || 'Failed to create folder "' + folder.name + '".',
+          e,
+      );
+    }
+  }
+}
+
+/**
  * @param {Object} options
  */
 function exportPdfDwgEps(options) {
+  log.addPart('fun: exportPdfDwgEps()');
 
   if (0 === app.documents.length) {
     throw {
@@ -345,45 +297,74 @@ function exportPdfDwgEps(options) {
     };
   }
 
-  const FOLDER_NAME = options.folderName;
-  const DOC_FILE = new File(app.activeDocument.fullName);
+  const DOC_FILE_SOURCE = new File(app.activeDocument.fullName);
+  const DOC_NAME = getFileName(app.activeDocument);
   const DOC_ARTBOARDS_LENGTH = app.activeDocument.artboards.length;
+  const DOC_FOLDER_PATH = app.activeDocument.path;
 
-  var doc, i, pageNumber;
+  const FOLDER_NAME = options.folderName;
+  const FOLDER_PATH = app.activeDocument.path + '/' + FOLDER_NAME;
+  const FOLDER = new Folder(FOLDER_PATH);
+  checkFolder(FOLDER);
+
+  const DOC_FILE_TEMP = new File(DOC_FOLDER_PATH + '/' + DOC_NAME +
+      '__TEMP_' + Math.round(Math.random() * 10000).toString()
+      + '.' + getFileType(app.activeDocument),
+  );
+
+  if (options.createOutlines || options.outlineStroke) {
+    if (options.createOutlines) {
+      createOutlines(app.activeDocument);
+    }
+    if (options.outlineStroke) {
+      outlineStroke(app.activeDocument);
+    }
+    app.activeDocument.saveAs(DOC_FILE_TEMP);
+  }
+  const DOC_FILE = new File(app.activeDocument.fullName);
+
+  var doc, folderPdf, folderEps, file, i, pageNumber;
 
   // Экспорт в pdf
   // Все страницы в один
   if (true === options.pdfSingle) {
     doc = app.activeDocument;
-    saveAsPdf(doc, '', FOLDER_NAME, '');
+    file = new File(FOLDER_PATH + '/' + DOC_NAME + '.pdf');
+    saveAsPdf(doc, file, '');
     doc.close();
   }
 
   if (true === options.pdfMultiply || true === options.epsMultiply) {
     // Страницы в отдельные файлы
+
+    if (true === options.pdfMultiply) {
+      folderPdf = new Folder(
+          FOLDER_PATH + (options.pdfPlaceInFolder ? '/PDF' : ''));
+      checkFolder(folderPdf);
+    }
+
+    if (true === options.epsMultiply) {
+      folderEps = new Folder(
+          FOLDER_PATH + (options.pdfPlaceInFolder ? '/EPS' : ''));
+      checkFolder(folderEps);
+    }
+
     for (i = 0; i < DOC_ARTBOARDS_LENGTH; i++) {
+      pageNumber = (i < 9 ? '0' : '') + (i + 1).toString();
 
       if (true === options.pdfMultiply) {
         doc = app.open(DOC_FILE);
-        pageNumber = (i + 1).toString();
-        saveAsPdf(
-            doc,
-            pageNumber,
-            FOLDER_NAME + (options.pdfPlaceInFolder ? '/PDF' : ''),
-            '_PAGE-' + (pageNumber < 10 ? '0' : '') + pageNumber,
-        );
+        file = new File(folderPdf.fullName + '/'
+            + DOC_NAME + '_PAGE-' + pageNumber + '.pdf');
+        saveAsPdf(doc, file, pageNumber);
         doc.close(SaveOptions.DONOTSAVECHANGES);
       }
 
       if (true === options.epsMultiply) {
         doc = app.open(DOC_FILE);
-        pageNumber = (i + 1).toString();
-        saveAsEps(
-            doc,
-            pageNumber,
-            FOLDER_NAME + (options.epsPlaceInFolder ? '/EPS' : ''),
-            '_PAGE',
-        );
+        file = new File(folderEps.fullName + '/'
+            + DOC_NAME + '_PAGE.eps');
+        saveAsEps(doc, file, pageNumber);
         doc.close(SaveOptions.DONOTSAVECHANGES);
       }
     }
@@ -392,33 +373,76 @@ function exportPdfDwgEps(options) {
   // Экспорт в EPS все страницы
   if (true === options.epsSingle) {
     doc = app.open(DOC_FILE);
-    saveAsEps(doc, '', FOLDER_NAME, '');
+    file = new File(FOLDER_PATH + '/' + DOC_NAME + '.eps');
+    saveAsEps(doc, file, '');
     doc.close(SaveOptions.DONOTSAVECHANGES);
   }
 
   // Экспорт в DWG
   if (true === options.dwgSingle) {
     doc = app.open(DOC_FILE);
-    exportDwg(doc, FOLDER_NAME, '');
+    file = new File(FOLDER_PATH + '/' + DOC_NAME + '.dwg');
+    exportDwg(doc, file);
     doc.close(SaveOptions.DONOTSAVECHANGES);
   }
 
-  app.open(DOC_FILE);
+  if (DOC_FILE_TEMP.exists) {
+    DOC_FILE_TEMP.remove();
+  }
+
+  app.open(DOC_FILE_SOURCE);
 }
 
-const log = new STLog(false);
+const log = new STLog(true);
 const errorSolver = new STErrorSolver();
 
 /**
  * Create outlines from all texts in the document
- * @param doc
+ * @param {Document} doc
  */
 function createOutlines(doc) {
+  log.addPart('fun: createOutlines()');
+
   var i, textFrame;
   for (i = doc.textFrames.length - 1; i >= 0; i--) {
     textFrame = doc.textFrames[i];
     textFrame.createOutline();
   }
+}
+
+/**
+ * Create outlines from stroke
+ * @param {Document} doc
+ */
+function outlineStroke(doc) {
+  log.addPart('fun: outlineStroke()');
+
+  var i, pathItem, wasHidden, wasLocked;
+  for (i = doc.pathItems.length - 1; i >= 0; i--) {
+    log.write('i = ' + i);
+    pathItem = doc.pathItems[i];
+
+    wasHidden = pathItem.hidden;
+    wasLocked = pathItem.locked;
+
+    try {
+      pathItem.hidden = false;
+      pathItem.locked = false;
+      if (pathItem.stroked && pathItem.editable) {
+        selection = null;
+        pathItem.selected = true;
+        app.executeMenuCommand('OffsetPath v22');
+        pathItem.hidden = wasHidden;
+        pathItem.locked = wasLocked;
+        log.write(': stroke outlined');
+      }
+
+    } catch (e) {
+      log.write('err: ' + e.message);
+    }
+  }
+
+  log.addPart('fun-end: outlineStroke()');
 }
 
 /**
@@ -434,7 +458,7 @@ function showDialog() {
 
   /*
   Code for Import https://scriptui.joonas.me — (Triple click to select):
-  {"activeId":18,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":null,"windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"File export","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"pdfPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"PDF","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-2":{"id":2,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfSingle","text":"One file","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-3":{"id":3,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfMultiply","text":"Split by pages","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-4":{"id":4,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"dwgPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"DWG","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-5":{"id":5,"type":"Checkbox","parentId":4,"style":{"enabled":true,"varName":"dwgSingle","text":"One file","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-6":{"id":6,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"epsPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"EPS","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-7":{"id":7,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsMultiply","text":"Split by pages","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-8":{"id":8,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"btnGroup","preferredSize":[200,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["right","center"],"alignment":null}},"item-9":{"id":9,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnExport","text":"Export","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-10":{"id":10,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnCancel","text":"Cancel","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-11":{"id":11,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsSingle","text":"One file","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-12":{"id":12,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"mainPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"Options","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-13":{"id":13,"type":"EditText","parentId":12,"style":{"enabled":true,"varName":"folderName","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"Export-PDF-DWG-EPS","justify":"left","preferredSize":[0,0],"alignment":"fill","helpTip":null}},"item-14":{"id":14,"type":"StaticText","parentId":12,"style":{"enabled":true,"varName":"labelFolderName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"Folder name:","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-15":{"id":15,"type":"Checkbox","parentId":12,"style":{"enabled":true,"varName":"createOutlines","text":"Texts: create outlines","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-16":{"id":16,"type":"Checkbox","parentId":12,"style":{"enabled":true,"varName":"outlineStroke","text":"Paths: outline stroke","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-17":{"id":17,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsPlaceInFolder","text":"Place pages in folder PDF","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-18":{"id":18,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfPlaceInFolder","text":"Place pages in folder PDF","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}}},"order":[0,12,14,13,15,16,1,2,3,18,4,5,6,11,7,17,8,10,9],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
+  {"activeId":16,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":null,"windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"File export","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"pdfPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"PDF","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-2":{"id":2,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfSingle","text":"One file","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-3":{"id":3,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfMultiply","text":"Split by pages","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-4":{"id":4,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"dwgPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"DWG","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-5":{"id":5,"type":"Checkbox","parentId":4,"style":{"enabled":true,"varName":"dwgSingle","text":"One file","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-6":{"id":6,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"epsPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"EPS","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-7":{"id":7,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsMultiply","text":"Split by pages","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-8":{"id":8,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"btnGroup","preferredSize":[200,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["right","center"],"alignment":null}},"item-9":{"id":9,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnExport","text":"Export","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-10":{"id":10,"type":"Button","parentId":8,"style":{"enabled":true,"varName":"btnCancel","text":"Cancel","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-11":{"id":11,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsSingle","text":"One file","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-12":{"id":12,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"mainPanel","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"Options","preferredSize":[200,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-13":{"id":13,"type":"EditText","parentId":12,"style":{"enabled":true,"varName":"folderName","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"Export-PDF-DWG-EPS","justify":"left","preferredSize":[0,0],"alignment":"fill","helpTip":null}},"item-14":{"id":14,"type":"StaticText","parentId":12,"style":{"enabled":true,"varName":"labelFolderName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"Folder name:","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-15":{"id":15,"type":"Checkbox","parentId":12,"style":{"enabled":true,"varName":"createOutlines","text":"Texts: create outlines","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-16":{"id":16,"type":"Checkbox","parentId":12,"style":{"enabled":true,"varName":"outlineStroke","text":"Paths: outline stroke","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-17":{"id":17,"type":"Checkbox","parentId":6,"style":{"enabled":true,"varName":"epsPlaceInFolder","text":"Place pages in folder PDF","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-18":{"id":18,"type":"Checkbox","parentId":1,"style":{"enabled":true,"varName":"pdfPlaceInFolder","text":"Place pages in folder PDF","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}}},"order":[0,12,14,13,15,16,1,2,3,18,6,11,7,17,4,5,8,10,9],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
   */
 
 // DIALOG
@@ -473,7 +497,6 @@ function showDialog() {
   var outlineStroke = mainPanel.add(
       'checkbox', undefined, undefined, {name: 'outlineStroke'});
   outlineStroke.text = 'Paths: outline stroke';
-  outlineStroke.value = true;
 
 // PDFPANEL
 // ========
@@ -500,21 +523,6 @@ function showDialog() {
   pdfPlaceInFolder.text = 'Place pages in folder PDF';
   pdfPlaceInFolder.value = true;
 
-// DWGPANEL
-// ========
-  var dwgPanel = dialog.add('panel', undefined, undefined, {name: 'dwgPanel'});
-  dwgPanel.text = 'DWG';
-  dwgPanel.preferredSize.width = 200;
-  dwgPanel.orientation = 'column';
-  dwgPanel.alignChildren = ['left', 'top'];
-  dwgPanel.spacing = 10;
-  dwgPanel.margins = 10;
-
-  var dwgSingle = dwgPanel.add(
-      'checkbox', undefined, undefined, {name: 'dwgSingle'});
-  dwgSingle.text = 'One file';
-  dwgSingle.value = true;
-
 // EPSPANEL
 // ========
   var epsPanel = dialog.add('panel', undefined, undefined, {name: 'epsPanel'});
@@ -538,6 +546,21 @@ function showDialog() {
       'checkbox', undefined, undefined, {name: 'epsPlaceInFolder'});
   epsPlaceInFolder.text = 'Place pages in folder PDF';
   epsPlaceInFolder.value = true;
+
+// DWGPANEL
+// ========
+  var dwgPanel = dialog.add('panel', undefined, undefined, {name: 'dwgPanel'});
+  dwgPanel.text = 'DWG';
+  dwgPanel.preferredSize.width = 200;
+  dwgPanel.orientation = 'column';
+  dwgPanel.alignChildren = ['left', 'top'];
+  dwgPanel.spacing = 10;
+  dwgPanel.margins = 10;
+
+  var dwgSingle = dwgPanel.add(
+      'checkbox', undefined, undefined, {name: 'dwgSingle'});
+  dwgSingle.text = 'One file';
+  dwgSingle.value = true;
 
 // BTNGROUP
 // ========
