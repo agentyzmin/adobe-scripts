@@ -102,7 +102,7 @@ STErrorSolver = function(level, lang) {
  */
 STLog = function(writeLog) {
   writeLog = writeLog || false;
-  const file = new File('~/Desktop/log-ai-export-pdf-dwg-eps.log');
+  const file = new File('~/Desktop/ai-export-pdf-dwg-eps.log');
 
   if (true === writeLog) {
     file.open('w');

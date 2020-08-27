@@ -4,12 +4,19 @@
 
 /** @type {boolean} Show dialog with options: true or false */
 const SHOW_DIALOG = true;
+
 /** @type {number} Default value of margin */
-const DEFAULT_MARGIN = 20;
+const DEFAULT_MARGIN = 0;
+
 /** @type {string} Default unit: mm or pt */
 const DEFAULT_UNIT = 'mm';
-/** @type {boolean} Geometric bounds: true or false */
-const GEOMETRIC_BOUNDS = true;
+
+/**
+ * @type {boolean} Geometric bounds: true or false
+ * If true — The bounds of the artwork excluding stroke width.
+ * If false — The visible bounds of the artwork including stroke width.
+ */
+const GEOMETRIC_BOUNDS = false;
 
 
 /**
@@ -19,10 +26,19 @@ const GEOMETRIC_BOUNDS = true;
  * @param {boolean=} options.geometricBounds
  * @param options
  */
-function createArtboardV1(options) {
+function createArtboardBySelectedV1(options) {
 
     options = options || {};
     options.margin = parseFloat(options.margin) || 0;
+    options.unit = options.unit || 'mm';
+    if (false !== options.geometricBounds) {
+        options.geometricBounds = true;
+    }
+
+    if ('mm' !== options.unit && 'pt' !== options.unit) {
+        alert('Error: \nUndefined unit "' + options.unit + '".\nCan be only "mm" or "pt".');
+        return false;
+    }
 
     var rect = {
         left: null,
@@ -77,11 +93,6 @@ function createArtboardV1(options) {
 }
 
 function showDialog() {
-    if (0 === app.documents.length) {
-        alert('No documents opened.');
-        return false;
-    }
-
     /*
     Code for Import https://scriptui.joonas.me — (Triple click to select):
     {"activeId":10,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":null,"windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"Create artboard","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"panelMargin","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"Margin","preferredSize":[150,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-2":{"id":2,"type":"EditText","parentId":9,"style":{"enabled":true,"varName":"margin","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"20","justify":"left","preferredSize":[40,0],"alignment":null,"helpTip":null}},"item-4":{"id":4,"type":"RadioButton","parentId":5,"style":{"enabled":false,"varName":"visibleBounds","text":"Visible","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-5":{"id":5,"type":"Panel","parentId":0,"style":{"enabled":true,"varName":"groupBounds","creationProps":{"borderStyle":"etched","su1PanelCoordinates":false},"text":"Bounds","preferredSize":[150,0],"margins":10,"orientation":"column","spacing":10,"alignChildren":["left","top"],"alignment":null}},"item-6":{"id":6,"type":"RadioButton","parentId":5,"style":{"enabled":true,"varName":"geometricBounds","text":"geometric","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-7":{"id":7,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"groupButtons","preferredSize":[150,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["right","center"],"alignment":null}},"item-8":{"id":8,"type":"Button","parentId":7,"style":{"enabled":true,"varName":"buttonCreate","text":"Create","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-9":{"id":9,"type":"Group","parentId":1,"style":{"enabled":true,"varName":"groupMargin","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-10":{"id":10,"type":"DropDownList","parentId":9,"style":{"enabled":true,"varName":"unit","text":"DropDownList","listItems":"mm,pt","preferredSize":[0,0],"alignment":null,"selection":0,"helpTip":null}}},"order":[0,1,9,2,10,5,6,4,7,8],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
@@ -153,12 +164,11 @@ function showDialog() {
     buttonCreate.onClick = function () {
         const options = {
             margin: margin.text,
-            unit: unit.selection,
+            unit: unit.selection.toString(),
             geometricBounds: geometricBounds.value,
-            visibleBounds: visibleBounds.value,
         };
         dialog.close();
-        createArtboardV1(options);
+        createArtboardBySelectedV1(options);
     }
 
     dialog.onShow = function () {
@@ -177,15 +187,25 @@ function showDialog() {
 }
 
 function run() {
+    if (0 === app.documents.length) {
+        alert('Error: \nNo documents opened.');
+        return false;
+    }
+
+    if (0 === selection.length) {
+        alert('Error: \nNothing selected.');
+        return false;
+    }
+
     if (SHOW_DIALOG) {
         showDialog();
     } else {
         const options = {
             margin: DEFAULT_MARGIN,
             unit: DEFAULT_UNIT,
-            geometricBounds: true,
+            geometricBounds: GEOMETRIC_BOUNDS,
         };
-        createArtboardV1(options);
+        createArtboardBySelectedV1(options);
     }
 }
 
