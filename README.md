@@ -27,4 +27,7 @@
 - переведення контурів в об’єкти
 - збереження всіх файлів в окрему папку (за замовченням папка називатиметься по назві файлу)
 
+<img src="https://github.com/agentyzmin/adobe-scripts/raw/master/Ai/export-pdf-dwg-eps-v1.png" width="400">
+
 [Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/Ai/export-pdf-dwg-eps-v1.jsx)
+
