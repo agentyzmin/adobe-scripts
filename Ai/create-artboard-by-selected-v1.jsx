@@ -3,6 +3,7 @@
  */
 
 /**
+ * YOU CAN CHANGE VALUES OF THIS 4 CONSTANTS
  * BEGIN OF EDITABLE CONSTANTS
  */
 
@@ -26,6 +27,11 @@ const DEFAULT_GEOMETRIC_BOUNDS = true;
  * END OF EDITABLE CONSTANTS
  */
 
+
+/**
+ * Sets the value of an environment variable and retrieves the value of an environment variable.
+ * @type {{MARGIN: string, UNIT: string, GEOMETRIC_BOUNDS: string, PRODUCT_PREFIX: string}}
+ */
 const ENV = {
     PRODUCT_PREFIX: 'CABS_',
     MARGIN: this.PRODUCT_PREFIX + 'MARGIN',
@@ -175,20 +181,8 @@ function showDialog() {
     var buttonCreate = groupButtons.add("button", undefined, undefined, {name: "buttonCreate"});
     buttonCreate.text = "Create";
 
-    buttonCreate.onClick = function () {
-        const options = {
-            margin: margin.text,
-            unit: unit.selection.toString(),
-            geometricBounds: geometricBounds.value,
-        };
-        $.setenv(ENV.MARGIN, options.margin);
-        $.setenv(ENV.UNIT, options.unit);
-        $.setenv(ENV.GEOMETRIC_BOUNDS, options.geometricBounds ? '1' : '0');
-        dialog.close();
-        createArtboardBySelectedV1(options);
-    }
-
     dialog.onShow = function () {
+        buttonCreate.active = true;
         const envMargin = $.getenv(ENV.MARGIN);
         margin.text = null !== envMargin ? envMargin : DEFAULT_MARGIN;
 
@@ -204,6 +198,19 @@ function showDialog() {
             null !== $.getenv(ENV.GEOMETRIC_BOUNDS) ? '1' === $.getenv(ENV.GEOMETRIC_BOUNDS) : DEFAULT_GEOMETRIC_BOUNDS;
         geometricBounds.value = envGeometricBounds;
         visibleBounds.value = !envGeometricBounds;
+    }
+
+    buttonCreate.onClick = function () {
+        const options = {
+            margin: margin.text,
+            unit: unit.selection.toString(),
+            geometricBounds: geometricBounds.value,
+        };
+        $.setenv(ENV.MARGIN, options.margin);
+        $.setenv(ENV.UNIT, options.unit);
+        $.setenv(ENV.GEOMETRIC_BOUNDS, options.geometricBounds ? '1' : '0');
+        dialog.close();
+        createArtboardBySelectedV1(options);
     }
 
     dialog.show();
