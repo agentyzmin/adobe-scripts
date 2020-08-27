@@ -6,7 +6,7 @@
 const SHOW_DIALOG = true;
 
 /** @type {number} Default value of margin */
-const DEFAULT_MARGIN = 0;
+const DEFAULT_MARGIN = 20;
 
 /** @type {string} Default unit: mm or pt */
 const DEFAULT_UNIT = 'mm';
@@ -16,7 +16,7 @@ const DEFAULT_UNIT = 'mm';
  * If true — The bounds of the artwork excluding stroke width.
  * If false — The visible bounds of the artwork including stroke width.
  */
-const GEOMETRIC_BOUNDS = false;
+const GEOMETRIC_BOUNDS = true;
 
 
 /**
