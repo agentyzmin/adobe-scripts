@@ -2,6 +2,10 @@
  * @author Sergey Turulin sergey@turulin.ru
  */
 
+/**
+ * BEGIN OF EDITABLE CONSTANTS
+ */
+
 /** @type {boolean} Show dialog with options: true or false */
 const SHOW_DIALOG = true;
 
@@ -16,8 +20,18 @@ const DEFAULT_UNIT = 'mm';
  * If true — The bounds of the artwork excluding stroke width.
  * If false — The visible bounds of the artwork including stroke width.
  */
-const GEOMETRIC_BOUNDS = true;
+const DEFAULT_GEOMETRIC_BOUNDS = true;
 
+/**
+ * END OF EDITABLE CONSTANTS
+ */
+
+const ENV = {
+    PRODUCT_PREFIX: 'CABS_',
+    MARGIN: this.PRODUCT_PREFIX + 'MARGIN',
+    UNIT: this.PRODUCT_PREFIX + 'UNIT',
+    GEOMETRIC_BOUNDS: this.PRODUCT_PREFIX + 'GEOMETRIC_BOUNDS',
+}
 
 /**
  * @param {Object=} options
@@ -73,7 +87,7 @@ function createArtboardBySelectedV1(options) {
         }
 
         bottom = bounds[3];
-        if (null === rect.bottom || rect.top > bottom) {
+        if (null === rect.bottom || rect.bottom > bottom) {
             rect.bottom = bottom;
         }
     }
@@ -167,20 +181,29 @@ function showDialog() {
             unit: unit.selection.toString(),
             geometricBounds: geometricBounds.value,
         };
+        $.setenv(ENV.MARGIN, options.margin);
+        $.setenv(ENV.UNIT, options.unit);
+        $.setenv(ENV.GEOMETRIC_BOUNDS, options.geometricBounds ? '1' : '0');
         dialog.close();
         createArtboardBySelectedV1(options);
     }
 
     dialog.onShow = function () {
-        margin.text = DEFAULT_MARGIN;
+        const envMargin = $.getenv(ENV.MARGIN);
+        margin.text = null !== envMargin ? envMargin : DEFAULT_MARGIN;
+
+        const envUnit = null !== $.getenv(ENV.UNIT) ? $.getenv(ENV.UNIT) : DEFAULT_UNIT;
         for (var i = 0; unit.items.length; i++) {
-            if (DEFAULT_UNIT === unit.items[i].text) {
+            if (envUnit === unit.items[i].text) {
                 unit.selection = i;
                 break;
             }
         }
-        geometricBounds.value = GEOMETRIC_BOUNDS;
-        visibleBounds.value = !GEOMETRIC_BOUNDS;
+
+        const envGeometricBounds =
+            null !== $.getenv(ENV.GEOMETRIC_BOUNDS) ? '1' === $.getenv(ENV.GEOMETRIC_BOUNDS) : DEFAULT_GEOMETRIC_BOUNDS;
+        geometricBounds.value = envGeometricBounds;
+        visibleBounds.value = !envGeometricBounds;
     }
 
     dialog.show();
@@ -203,7 +226,7 @@ function run() {
         const options = {
             margin: DEFAULT_MARGIN,
             unit: DEFAULT_UNIT,
-            geometricBounds: GEOMETRIC_BOUNDS,
+            geometricBounds: DEFAULT_GEOMETRIC_BOUNDS,
         };
         createArtboardBySelectedV1(options);
     }
