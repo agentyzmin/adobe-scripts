@@ -19,10 +19,10 @@ FONT = "Helvetica-Bold";
 FONTSIZE = 10;
 
 // Colot Step
-STEP = 3;
+STEP = 5;
 
-// 
-QV = 8;
+// Range of color
+QV = 15;
 
 // Количество вариантов
 QTY = 10;
