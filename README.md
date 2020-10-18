@@ -11,7 +11,7 @@
 ### create-artboard-by-selected-v1.jsx
 Скрипт створює артборди по виділених об’єктах.
 
-[Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/Ai/create-artboard-by-selected-v1.jsx)
+[Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/AI/create-artboard-by-selected-v1.jsx)
 
 
 ### export-pdf-dwg-eps-v1.jsx
@@ -29,7 +29,16 @@
 
 <img src="https://github.com/agentyzmin/adobe-scripts/raw/master/Ai/export-pdf-dwg-eps-v1.png" width="400">
 
-[Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/Ai/export-pdf-dwg-eps-v1.jsx)
+[Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/AI/export-pdf-dwg-eps-v1.jsx)
+
+
+### Color Proof Maker
+Скрипт, який генерує варіанти кольорів для цифрового друку у CMYK для виділеного об’єкта. 
+
+<img src="https://github.com/agentyzmin/adobe-scripts/raw/master/AI/color-proof-maker-v1.gif" width="400">
+
+[Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/AI/color-proof-maker-v1.jsx)
+
 
 
 
