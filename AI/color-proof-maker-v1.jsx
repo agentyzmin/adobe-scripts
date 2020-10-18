@@ -1,16 +1,10 @@
 // ABOUT
-// 
-// 
+// Скрипт, який генерує варіанти кольорів для цифрового друку у CMYK для виділеного об’єкта. 
 // 
 // v.1.0
 
 // AUTHOR
 // 2020, Aleksandr Kolodko, alexkolodko.com
-
-// LICENCE CC-BY 
-
-/////////////////////////////////////////////////////////////////
-
 
 
 const PT_TO_MM = 2.8346456692913;
@@ -20,31 +14,30 @@ const EM_TO_MM = 0.3514598035146;
 // GLOBAL VARIABLES
 doc = app.activeDocument;
 
-// Шрифт и размер в pt
+// Font name and size
 FONT = "Helvetica-Bold";
 FONTSIZE = 10;
 
-// Шаг краски
+// Colot Step
 STEP = 3;
 
-// ±
+// 
 QV = 8;
 
 // Количество вариантов
 QTY = 10;
 
-
-// Отступ между цветами в мм
+// Margon between swatches
 MARGIN = 2;
 
-// Отступ до палитры в мм
+// Margin between original and swatches
 PALLETE_MARGIN = 8;
 
-// Размер образца цвета в мм
+// Swatch size (width & height) in mm
 rectW = 40;
 rectH = 20;
 
-// Определяем белый и черный цвет для надписей
+// Check balck & white colors for swatch name
 black = new CMYKColor();
 white = new CMYKColor();
 black.black = 100;
@@ -67,7 +60,7 @@ if (theSelect.length == 0)
 } else {
 
     getColorFromSelection();
-    // deleteProofLayer();
+    deleteProofLayer();
     addProofLayer();
 
     // Calculate colors
@@ -86,90 +79,13 @@ if (theSelect.length == 0)
     drawLabel(firstCoordY * PT_TO_MM, labelPositionX, "Original");
     drawRect (firstCoordY * PT_TO_MM, firstCoordX * PT_TO_MM, selectedOBJ_COLOR);
 
-
-    // changedColor = selectedOBJ_COLOR;
-    
-    // colorA = [
-    //     "changedColor.cyan",
-    //     "changedColor.magenta",
-    //     "changedColor.yellow",
-    //     "changedColor.blac"
-    // ];
-
-
-    // for (j=0; j < 4; j++) {        
-
-    //     drawLabel(labelPositionY, labelPositionX - (rectH * PT_TO_MM * j) - (MARGIN * PT_TO_MM * j) - (5 * PT_TO_MM * j), "Pallete " + colorN[j]);
-        
-    //     border = colorA[j] + QV;
-
-    //         for (i=0;i <= QTY;i++) {
-    //             if(colorA[j] > border || colorA[j] > 100){break;}
-    //             colorA[j] = colorA[j] + STEP;
-    //             drawRect(labelPositionY + (MARGIN * PT_TO_MM * i) + (rectW * PT_TO_MM * i), 0, changedColor);
-    //         }
-
-    // }
-
-
-
-
-
-
-    // 
-    // drawLabel(labelPositionY, labelPositionX, "Pallete C");
-
-    // border = selectedOBJ_COLOR.cyan + QV;
-    // for (i=0;i <= QTY;i++) {
-    //     if(changedColor.cyan >= border || changedColor.cyan > 100){break;}
-    //     changedColor.cyan = changedColor.cyan + STEP;
-    //     drawRect(labelPositionY + (MARGIN * PT_TO_MM * i) + (rectW * PT_TO_MM * i), 0, changedColor);
-    // }
-
-
-    // drawLabel(labelPositionY, labelPositionX - (rectH * PT_TO_MM) - (MARGIN * PT_TO_MM) - (5 * PT_TO_MM), "Pallete M");
-
-    // border = selectedOBJ_COLOR.magenta + QV;
-    // for (i=0;i <= QTY;i++) {
-    //     if(changedColor.magenta >= border || changedColor.magenta > 100){break;}
-    //     changedColor.magenta = changedColor.magenta + STEP;
-    //     drawRect(labelPositionY + (MARGIN * PT_TO_MM * i) + (rectW * PT_TO_MM * i), 0 - (rectH * PT_TO_MM) - (MARGIN * PT_TO_MM) - (5 * PT_TO_MM), changedColor);
-    // }
-
-    // drawLabel(labelPositionY, labelPositionX - (rectH * PT_TO_MM * 2) - (MARGIN * PT_TO_MM * 2) - (10 * PT_TO_MM), "Pallete Y");
-
-    // border = selectedOBJ_COLOR.yellow + QV;
-    // for (i=0;i <= QTY;i++) {
-    //     if(changedColor.yellow >= border || changedColor.yellow > 100){break;}
-    //     changedColor.yellow = changedColor.yellow + STEP;
-    //     drawRect(labelPositionY + (MARGIN * PT_TO_MM * i) + (rectW * PT_TO_MM * i), 0 - (rectH * PT_TO_MM * 2) - (MARGIN * PT_TO_MM * 2) - (10 * PT_TO_MM), changedColor);
-    // }
-
-
-    // drawLabel(labelPositionY, labelPositionX - (rectH * PT_TO_MM * 3) - (MARGIN * PT_TO_MM * 3) - (15 * PT_TO_MM), "Pallete K");
-
-    // border = selectedOBJ_COLOR.black + QV;
-    // for (i=0;i <= QTY;i++) {
-    //     if(changedColor.black >= border || changedColor.black > 100){break;}
-    //     changedColor.black = changedColor.black + STEP;
-    //     drawRect(labelPositionY + (MARGIN * PT_TO_MM * i) + (rectW * PT_TO_MM * i), 0 - (rectH * PT_TO_MM * 3) - (MARGIN * PT_TO_MM * 3) - (15 * PT_TO_MM), changedColor);
-    // }
-
-
-
-
-
-    alert(
-        "Color Palletes" + "\n" +
-        "C:" + variants_C +"\n" +
-        "M:" + variants_M +"\n" +
-        "Y:" + variants_Y +"\n" +
-        "K:" + variants_K
-        );
-
-    // alert(variants_C.join('\n'));
-    // alert(variants_C[1]);
-
+    // alert(
+    //     "Color Palletes" + "\n" +
+    //     "C:" + variants_C +"\n" +
+    //     "M:" + variants_M +"\n" +
+    //     "Y:" + variants_Y +"\n" +
+    //     "K:" + variants_K
+    //     );
 
     drawPallete(
         variants_C,
@@ -311,11 +227,6 @@ function calculateColors (color){
         var arrMax = aMax.push(calcColorMax); 
       }   
 
-    // return [color, aMin, aMax];
-    // var NewArr = color.bind(aMin).bind(aMax);
-    // return NewArr;
-
-
     for (var NewArr=aMin, iii=0; iii < aMax.length; iii++) aMin.push(aMax[iii]);
     NewArr.unshift(color);
     return NewArr;
@@ -335,17 +246,6 @@ function drawLabel (textX, textY, text) {
     textLabel.textRange.characterAttributes.textFont = app.textFonts.getByName(FONT);
 }
 
-
-
-// // Draw random pallete
-// function drawRandomPallete (x, y) {
-//     for (var iii = 0; iii < QTY; iii++) {
-//         rectX = x + (rectW * PT_TO_MM * iii) + (MARGIN * PT_TO_MM * iii);
-//         rectY = y;
-//         colorX = randomColor();
-//         drawRect (rectX, rectY, colorX);
-//     }
-// }
 
 
 
@@ -370,14 +270,12 @@ function deleteProofLayer () {
 }
 
 
-
 // Add layer "ProofPallete"    
 function addProofLayer() {
     artLayer = doc.layers.add();
     artLayer.index = 0;
     artLayer.name = "ProofPallete";
 }
-
 
 
 // Draw color rectangle with color value
@@ -408,95 +306,6 @@ function drawRect (y, x, color) {
     myTextFrame.move (rectGroup,ElementPlacement.PLACEATEND);
     rect.move (rectGroup,ElementPlacement.PLACEATEND);
 }
-
-
-
-
-
-
-
-
-// // Random color
-// function randomColor (newCMYKColor) {
-//     newCMYKColor = new CMYKColor();
-//     newCMYKColor.cyan    = getRandomInt(0,100);
-//     newCMYKColor.magenta = getRandomInt(0,100);
-//     newCMYKColor.yellow  = getRandomInt(0,100);
-//     // newCMYKColor.black   = getRandomInt(0,100);
-//     return newCMYKColor;
-// }
-
-// function getRandomInt(min, max) {
-//     min = Math.ceil(min);
-//     max = Math.floor(max);
-//     return Math.floor(Math.random() * (max - min)) + min; //Включно з мінімальним та виключаючи максимальне значення 
-// }
-
-
-
-
-// function getColorValues(color)
-// {
-//         if(color.typename)
-//         {
-//             switch(color.typename)
-//             {
-//                 case "CMYKColor":
-//                     if(displayAs == "CMYKColor"){
-//                         return ([Math.floor(color.cyan),Math.floor(color.magenta),Math.floor(color.yellow),Math.floor(color.black)]);}
-//                     else
-//                     {
-//                         color.typename="RGBColor";
-//                         return  [Math.floor(color.red),Math.floor(color.green),Math.floor(color.blue)] ;
-                       
-//                     }
-//                 case "RGBColor":
-                   
-//                    if(displayAs == "CMYKColor"){
-//                         return rgb2cmyk(Math.floor(color.red),Math.floor(color.green),Math.floor(color.blue));
-//                    }else
-//                     {
-//                         return  [Math.floor(color.red),Math.floor(color.green),Math.floor(color.blue)] ;
-//                     }
-//                 case "GrayColor":
-//                     if(displayAs == "CMYKColor"){
-//                         return rgb2cmyk(Math.floor(color.gray),Math.floor(color.gray),Math.floor(color.gray));
-//                     }else{
-//                         return [Math.floor(color.gray),Math.floor(color.gray),Math.floor(color.gray)];
-//                     }
-//                 case "SpotColor":
-//                     return getColorValues(color.spot.color);
-//             }    
-//         }
-//     return "Non Standard Color Type";
-// }
-
-
-
-
-
-// function unGroupItems(items) {
-//     for ( var i = 0; i < items.length; i++ ) {
-//         var item = items[i];
-//         if (item.typename == "GroupItem") {
-//             items.splice(i, 1);
-//             var groupContent = [];
-//             for ( var j = 0; j < item.pathItems.length; j++ ) {
-//                 groupContent.push(item.pathItems[j])
-//             }
-//             for ( var j = 0; j < item.compoundPathItems.length; j++ ) {
-//                 groupContent.push(item.compoundPathItems[j])
-//             }
-//             for ( var j = 0; j < item.groupItems.length; j++ ) {
-//                 groupContent.push(item.groupItems[j]);
-//             }
-//             for ( var j = 0; j < groupContent.length; j++) {
-//                 items.splice(i+1, 0, groupContent[j]);
-//             }
-//         }
-//     }
-//     return items;
-// }
 
 
 
