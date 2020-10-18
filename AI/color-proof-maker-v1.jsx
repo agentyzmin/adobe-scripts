@@ -1,5 +1,5 @@
 // ABOUT
-// Скрипт, який генерує варіанти кольорів для цифрового друку у CMYK для виділеного об’єкта. 
+// Script generate color swatches for digital printing in CMYK for a selected object.
 // 
 // v.1.0
 
@@ -44,12 +44,7 @@ black.black = 100;
 white.black = 0;
 
 
-colorN = [
-    "cyan",
-    "magenta",
-    "yellow",
-    "black"
-];
+
 
 
 // GET COLOR OF SELECTED OBJECT
