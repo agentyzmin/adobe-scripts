@@ -60,7 +60,7 @@ if (theSelect.length == 0)
 } else {
 
     getColorFromSelection();
-    deleteProofLayer();
+    // deleteProofLayer();
     addProofLayer();
 
     // Calculate colors
@@ -114,10 +114,10 @@ if (c[0]>0) {
         "Pallete C"
         );
     
-    for (var i = 0; i < c.length; i++) {
+    for (var i = 1; i < c.length; i++) {
         selectedOBJ_COLOR.cyan = c[i];
         drawRect (
-            xc + (MARGIN * PT_TO_MM * i) + (rectW * PT_TO_MM * i),
+            xc + (MARGIN * PT_TO_MM * (i-1)) + (rectW * PT_TO_MM * (i-1)),
             firstCoordX * n,
             selectedOBJ_COLOR);
         }
@@ -130,11 +130,11 @@ if (m[0]>0) {
         yc - (rectH * PT_TO_MM * n) - (MARGIN * PT_TO_MM * n) - (5 * PT_TO_MM * n), 
         "Pallete M"
         );
-    for (var ii = 0; ii < m.length; ii++) {
+    for (var ii = 1; ii < m.length; ii++) {
         selectedOBJ_COLOR.cyan = c[0];    ///////////// <-------------
         selectedOBJ_COLOR.magenta = m[ii];
         drawRect (
-            xc + (MARGIN * PT_TO_MM * ii) + (rectW * PT_TO_MM * ii), 
+            xc + (MARGIN * PT_TO_MM * (ii-1)) + (rectW * PT_TO_MM * (ii-1)), 
             firstCoordX - (rectH * PT_TO_MM * n) - (MARGIN * PT_TO_MM * n) - (5 * PT_TO_MM * n),
             selectedOBJ_COLOR);
     }
@@ -148,11 +148,11 @@ if (y[0]>0) {
         yc - (rectH * PT_TO_MM * n) - (MARGIN * PT_TO_MM * n) - (5 * PT_TO_MM * n),
         "Pallete Y"
         );
-    for (var iii = 0; iii < y.length; iii++) {
+    for (var iii = 1; iii < y.length; iii++) {
         selectedOBJ_COLOR.magenta = m[0];    ///////////// <-------------
         selectedOBJ_COLOR.yellow = y[iii];
         drawRect (
-            xc + (MARGIN * PT_TO_MM * iii) + (rectW * PT_TO_MM * iii),
+            xc + (MARGIN * PT_TO_MM * (iii-1)) + (rectW * PT_TO_MM * (iii-1)),
             firstCoordX - (rectH * PT_TO_MM * n) - (MARGIN * PT_TO_MM * n) - (5 * PT_TO_MM * n),
             selectedOBJ_COLOR
             );
@@ -166,11 +166,11 @@ if (k[0]>0) {
         yc - (rectH * PT_TO_MM * n) - (MARGIN * PT_TO_MM * n) - (5 * PT_TO_MM * n),
         "Pallete K"
         );
-    for (var iiii = 0; iiii < k.length; iiii++) {
+    for (var iiii = 1; iiii < k.length; iiii++) {
         selectedOBJ_COLOR.yellow = y[0];    ///////////// <-------------        
         selectedOBJ_COLOR.black = k[iiii];
         drawRect (
-            xc + (MARGIN * PT_TO_MM * iiii) + (rectW * PT_TO_MM * iiii),
+            xc + (MARGIN * PT_TO_MM * (iiii-1)) + (rectW * PT_TO_MM * (iiii-1)),
             firstCoordX - (rectH * PT_TO_MM * n) - (MARGIN * PT_TO_MM * n) - (5 * PT_TO_MM * n),
             selectedOBJ_COLOR
             );
@@ -271,10 +271,14 @@ function deleteProofLayer () {
 
 
 // Add layer "ProofPallete"    
-function addProofLayer() {
+function addProofLayer(layername) {
     artLayer = doc.layers.add();
     artLayer.index = 0;
-    artLayer.name = "ProofPallete";
+    artLayer.name = "ProofPallete-" + 
+    selectedOBJ_COLOR.cyan + "-" +
+    selectedOBJ_COLOR.magenta + "-" +
+    selectedOBJ_COLOR.yellow + "-" +
+    selectedOBJ_COLOR.black;
 }
 
 
