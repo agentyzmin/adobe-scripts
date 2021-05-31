@@ -2,12 +2,6 @@
 
 ## Adobe Illustrator
 
-### convert-shape-to-json.jsx
-Переводить фігури у JSON для використання у скриптах та екстеншенах Adobe.
-
-[Завантажити](https://github.com/agentyzmin/adobe-scripts/blob/master/Ai/convert-shape-to-json.jsx)
-
-
 ### create-artboard-by-selected-v1.jsx
 Скрипт створює артборди по виділених об’єктах.
 
